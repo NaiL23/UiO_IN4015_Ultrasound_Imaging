@@ -73,13 +73,13 @@ das_weighted_CF_signal = zeros(scan.N_x_axis,scan.N_z_axis);
 
 % Calculate the coherent sum over the elements (the expression in the
 % numerator (above the brøkstrek ;))
-coherent_sum;                             %<----- Finish this line
+coherent_sum = abs(sum(data_cube, 3)).^2;                             %<----- Finish this line
 % Calculate the incoherent sum over the elements (the sum in the expression
 % in the denominator (below the brøkstrek ;))
-incoherent_sum;                               %<----- Finish this line
+incoherent_sum = sum(abs(data_cube).^2, 3);                               %<----- Finish this line
 % Use the coherent, incoherent sum and the scalar M for each pixel to
 % calculate the coherence factor as in expression 1.38.
-CF;                                           %<----- Finish this line
+CF = coherent_sum ./ (M.*incoherent_sum);                                           %<----- Finish this line
 
 %% USTB implementation of coherence factor
 cf = postprocess.coherence_factor()
@@ -94,6 +94,9 @@ USTB_coherence_factor = cf.CF.get_image('none');
 % Do as you have done in earlier module exercises. Some numerical tolerance
 % might be needed. Display the results in your report.
 
+if mean(abs(CF - USTB_coherence_factor), 'all') < 1e-6
+    disp("Correct CF Implementation")
+end
 %% Part III : Let's analyse the delayed data
 % If we plot the delayed data for two pixels in the image, and deliberately
 % choosing to plot the delayed data around the point scatter at x = -5.5 mm
@@ -147,11 +150,18 @@ caxis([-200 0])
 das_img_signal = b_data_das.get_image('none');
 das_img_db = db(abs((das_img_signal.*weights)./max(das_img_signal(:).*weights(:))));
 
-das_weighted_CF_signal ; % <-------- You should implement this
-das_weighted_CF_db ;  % <---------- You should implement this
+das_weighted_CF_signal = CF .* das_img_signal; % <-------- You should implement this
+das_weighted_CF_db = db(abs((das_weighted_CF_signal.*weights)./max(das_weighted_CF_signal(:).*weights(:))));  % <---------- You should implement this
 
 % Compare that to the USTB versions as well. It is in das_CF_USTB
 
+figure
+subplot(121)
+imagesc(scan.x_axis*1000, scan.z_axis*1000, das_CF_USTB)
+colorbar; caxis([-60 0]); colormap gray; axis image; title('USTB DAS-CF');
+subplot(122)
+imagesc(scan.x_axis*1000, scan.z_axis*1000, das_weighted_CF_db)
+colorbar; caxis([-60 0]); colormap gray; axis image; title('Your DAS-CF');
 
 %% Part V: Compare DAS.*CF to DAS image
 % Now, let's compare the results from conventional DAS to the image with
@@ -176,7 +186,7 @@ imagesc(scan.x_axis*1000, scan.z_axis*1000, das_weighted_CF_db)
 colorbar; caxis([-60 0]); colormap gray; axis image; title('DAS weighted with CF');
 subplot(2,2,[3 4]);hold on;
 plot(scan.x_axis(x_start:x_stop)*1000,linspace(0,-50,x_stop-x_start+1),'k--','LineWidth',2,'Displayname','Theoretical')
-plot(scan.x_axis(x_start:x_stop)*1000,mean(das_img_db(350:470,x_start:x_stop),1)-max(mean(das_img_db(350:470,x_start:x_stop),1)),'b','LineWidth',2,'Displayname','Theoretical')
+plot(scan.x_axis(x_start:x_stop)*1000,mean(das_img_db(350:470,x_start:x_stop),1)-max(mean(das_img_db(350:470,x_start:x_stop),1)),'b','LineWidth',2,'Displayname','DAS')
 plot(scan.x_axis(x_start:x_stop)*1000,mean(das_weighted_CF_db(350:470,x_start:x_stop),1)-max(mean(das_weighted_CF_db(350:470,x_start:x_stop),1)),'r','LineWidth',2,'Displayname','DAS weighted CF')
 xlabel('x [mm]');ylabel('Amplitude [dB]');legend show
 
@@ -225,3 +235,10 @@ colormap gray; caxis([-60 0]); axis image; xlabel('x [mm]'); ylabel('z [mm]'); t
 
 % Estimate the mean and the background of all images and calculate the CR
 
+mean_background_das = mean(abs(das_img_signal(idx_background(:))).^2);
+mean_ROI_das = mean(abs(das_img_signal(idx_ROI(:))).^2);
+CR_das = 10*log10(mean_ROI_das/mean_background_das)
+
+mean_background_cf = mean(abs(das_weighted_CF_signal(idx_background(:))).^2);
+mean_ROI_cf = mean(abs(das_weighted_CF_signal(idx_ROI(:))).^2);
+CR_cf = 10*log10(mean_ROI_cf/mean_background_cf)

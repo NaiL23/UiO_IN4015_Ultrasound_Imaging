@@ -16,8 +16,8 @@ local_path = [ustb_path(),'/data/']; % location of example data
 addpath(local_path);
 
 % Choose dataset
-filename='Verasonics_P2-4_parasternal_long_small.uff';
-% filename='FieldII_P4_point_scatterers.uff';
+% filename='Verasonics_P2-4_parasternal_long_small.uff';
+filename='FieldII_P4_point_scatterers.uff';
 
 % check if the file is available in the local path or downloads otherwise
 tools.download(filename, url, local_path);
@@ -92,6 +92,17 @@ radial_distance = linspace(0,110e-3,N_depth);    % Depth (or radial distance)
 % Let us define some empty variables to contain the values you calculate
 delays = zeros(N_transmits, N_depth, N_elements);% Buffer for the calculated delays
 img = zeros(N_depth,N_transmits);                % Buffer for the final image
+
+% % The naive nested loops for calculating delay(t,d,r) :
+% for t = 1:N_transmits
+%     for r=1:N_elements
+%         for d=1:N_depth
+%             tx_delay = radial_distance(d)/c;
+%             rx_delay = hypot(radial_distance(d) * sin(angles(t)) - x_element_position(r), radial_distance(d) * cos(angles(t)) - z_element_position(r))/c;
+%             delays(t,d,r) = tx_delay + rx_delay - offset(t);
+%         end
+%     end
+% end
 
 % Pseudocode for beambased phased array beamformer
 % for each transmit

@@ -19,7 +19,6 @@ mid=midprocess.das();tic();                                % Beamform image
 mid.channel_data=channel_data;
 mid.dimension = dimension.both();
 mid.scan=scan;
-mid.code=code.mex;
 mid.transmit_apodization.window=uff.window.scanline;
 % mid.receive_apodization.window=uff.window.none;
 b_data = mid.go();toc();                         

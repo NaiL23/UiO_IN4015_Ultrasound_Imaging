@@ -37,7 +37,6 @@ mid.dimension = dimension.transmit();
 mid.scan=scan;
 mid.transmit_apodization.window=uff.window.scanline;
 mid.receive_apodization.window=uff.window.none;
-mid.code = code.mex;
 b_data = mid.go();                      
 
 %% Postprocess #1 : Coherence Factor
@@ -68,7 +67,6 @@ pipe.receive_apodization.window=uff.window.none;
 % Define midprocess DAS outside pipeline to set dimension
 das = midprocess.das()
 das.dimension = dimension.transmit()
-das.code = code.mex;
 
 % Run pipeline
 b_data_cf_pipe = pipe.go({demod das postprocess.coherence_factor() me});
