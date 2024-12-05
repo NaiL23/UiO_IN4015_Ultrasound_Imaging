@@ -1,4 +1,4 @@
-This folder contains exercises used in the course IN3015/4015 at UiO.
+This folder contains exercises used in the course IN3015/4015 at UiO ([Course Homepage](https://www.uio.no/studier/emner/matnat/ifi/IN4015/index-eng.html)).
 
 
 
